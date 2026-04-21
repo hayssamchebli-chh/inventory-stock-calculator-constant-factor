@@ -166,7 +166,7 @@ if uploaded_file:
 
     col1.metric("Total Items", len(df))
     col2.metric("Avg Safety Stock", int(df["Safety stock"].mean()))
-    col3.metric("Total To Order", int(df["To order"].clip(lower=0).sum()))
+    col3.metric("Items to Order", int((df["To order"] > 0).sum()))
 
     st.markdown('</div>', unsafe_allow_html=True)
 
