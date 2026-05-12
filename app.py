@@ -5,43 +5,170 @@ from io import BytesIO
 # =========================
 # PAGE CONFIG
 # =========================
-st.set_page_config(page_title="Inventory Calculator", layout="wide")
+st.set_page_config(
+    page_title="Inventory Calculator",
+    page_icon="📦",
+    layout="wide"
+)
 
 # =========================
-# CSS (Card UI)
+# PROFESSIONAL CSS
 # =========================
 st.markdown("""
 <style>
+/* Main background */
 .stApp {
-    background-color: #f7f9fc;
+    background: linear-gradient(180deg, #f5f7fb 0%, #eef2f7 100%);
 }
+
+/* Hide default Streamlit footer */
+footer {
+    visibility: hidden;
+}
+
+/* Main container spacing */
+.block-container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+/* Hero section */
+.hero {
+    background: linear-gradient(135deg, #102a43 0%, #243b53 100%);
+    padding: 34px 38px;
+    border-radius: 22px;
+    color: white;
+    margin-bottom: 26px;
+    box-shadow: 0 12px 30px rgba(16, 42, 67, 0.22);
+}
+
+.hero h1 {
+    margin: 0;
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.hero p {
+    margin-top: 10px;
+    font-size: 16px;
+    color: #d9e2ec;
+}
+
+/* Cards */
 .card {
-    background-color: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    margin-bottom: 20px;
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 18px;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    margin-bottom: 22px;
 }
-hr {display:none;}
+
+/* Section headings */
+.section-title {
+    font-size: 20px;
+    font-weight: 750;
+    color: #102a43;
+    margin-bottom: 6px;
+}
+
+.section-subtitle {
+    font-size: 14px;
+    color: #627d98;
+    margin-bottom: 18px;
+}
+
+/* Metric cards */
+.metric-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+}
+
+.metric-label {
+    font-size: 13px;
+    color: #627d98;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.metric-value {
+    font-size: 28px;
+    color: #102a43;
+    font-weight: 800;
+}
+
+/* Info box */
+.info-box {
+    background: #f0f7ff;
+    border-left: 5px solid #2f80ed;
+    padding: 16px 18px;
+    border-radius: 14px;
+    color: #243b53;
+    font-size: 14px;
+}
+
+/* Upload area text */
+.upload-note {
+    color: #627d98;
+    font-size: 14px;
+    margin-top: -6px;
+}
+
+/* Dataframe spacing */
+[data-testid="stDataFrame"] {
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+/* Buttons */
+.stDownloadButton > button {
+    background: linear-gradient(135deg, #1f7aec 0%, #155bd5 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.65rem 1rem;
+    font-weight: 700;
+    box-shadow: 0 8px 16px rgba(31, 122, 236, 0.22);
+}
+
+.stDownloadButton > button:hover {
+    background: linear-gradient(135deg, #155bd5 0%, #0f4bb8 100%);
+    color: white;
+}
+
+/* Alerts */
+.stSuccess, .stWarning, .stError {
+    border-radius: 12px;
+}
+
+/* Remove horizontal rule styling */
+hr {
+    display: none;
+}
 </style>
 """, unsafe_allow_html=True)
 
 # =========================
-# HEADER
+# HEADER / HERO
 # =========================
-st.title("📦 Inventory Safety Stock Calculator")
-st.markdown("Upload your file, set months and factor, and generate replenishment recommendations.")
+st.markdown("""
+<div class="hero">
+    <h1>📦 Inventory Safety Stock Calculator</h1>
+    <p>Upload your inventory file, adjust planning parameters, review calculated stock recommendations, and export a clean Excel report.</p>
+</div>
+""", unsafe_allow_html=True)
 
 # =========================
-# CARD 1 — PARAMETERS
+# SIDEBAR PARAMETERS
 # =========================
-st.markdown('<div class="card">', unsafe_allow_html=True)
+with st.sidebar:
+    st.markdown("## ⚙️ Parameters")
+    st.markdown("Adjust the values below before or after uploading your file.")
 
-st.markdown("### ⚙️ Parameters")
-
-col1, col2 = st.columns(2)
-
-with col2:
     months = st.number_input(
         "Months",
         min_value=1.0,
@@ -58,34 +185,55 @@ with col2:
         format="%.1f"
     )
 
-with col1:
-    st.markdown("#### ℹ️ About")
-    st.write(
-        f"""
-This tool calculates safety stock and recommended order quantity.
+    st.markdown("---")
 
-- **Months:** {months}
-- **FACTOR:** {factor}
-- **Safety:** ROUND(Sales 25&26 / Months) × FACTOR
-- **Order:** Safety - Forcasted
-"""
+    st.markdown("### Formula")
+    st.markdown(
+        """
+        **Sales 25&26**  
+        Qty Sold + Qty Sold PYear + Cons. Qty + Cons. Qty New
+
+        **Safety**  
+        ROUND(Sales 25&26 / Months) × FACTOR
+
+        **Order**  
+        Safety - Forcasted
+        """
     )
 
-st.markdown('</div>', unsafe_allow_html=True)
-
 # =========================
-# CARD 2 — FILE UPLOAD
+# UPLOAD CARD
 # =========================
 st.markdown('<div class="card">', unsafe_allow_html=True)
 
-st.markdown("### 📂 Upload File")
+left, right = st.columns([1.4, 1])
 
-uploaded_file = st.file_uploader("Main Inventory File", type=["xlsx"])
+with left:
+    st.markdown('<div class="section-title">📂 Upload Inventory File</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="section-subtitle">Upload the Excel file generated from your inventory report.</div>',
+        unsafe_allow_html=True
+    )
+
+    uploaded_file = st.file_uploader(
+        "Main Inventory File",
+        type=["xlsx"],
+        label_visibility="collapsed"
+    )
+
+with right:
+    st.markdown("""
+    <div class="info-box">
+        <strong>Expected file type:</strong> Excel .xlsx<br>
+        <strong>Output:</strong> Cleaned inventory recommendation file<br>
+        <strong>Zero-only columns:</strong> Removed automatically
+    </div>
+    """, unsafe_allow_html=True)
 
 if uploaded_file:
-    st.success("✅ File uploaded successfully")
+    st.success("✅ File uploaded successfully. Results are ready below.")
 else:
-    st.warning("⚠️ Please upload a file to proceed")
+    st.warning("⚠️ Upload an Excel file to generate the inventory report.")
 
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -119,8 +267,10 @@ if uploaded_file:
     missing_cols = [c for c in required_columns if c not in df.columns]
 
     if missing_cols:
+        st.markdown('<div class="card">', unsafe_allow_html=True)
         st.error(f"❌ Missing columns: {missing_cols}")
         st.write("Detected columns:", df.columns.tolist())
+        st.markdown('</div>', unsafe_allow_html=True)
         st.stop()
 
     # Keep only needed source columns first
@@ -201,55 +351,121 @@ if uploaded_file:
                 df.drop(columns=[col], inplace=True)
 
     # =========================
-    # CARD 3 — KPI
+    # SUMMARY SECTION
     # =========================
     st.markdown('<div class="card">', unsafe_allow_html=True)
 
-    st.markdown("### 📊 Summary")
+    st.markdown('<div class="section-title">📊 Report Summary</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="section-subtitle">A quick overview of the processed inventory file.</div>',
+        unsafe_allow_html=True
+    )
 
-    col1, col2, col3 = st.columns(3)
+    total_items = len(df)
+    total_safety = int(df["Safety"].sum()) if "Safety" in df.columns else 0
+    items_to_order = int((df["order"] > 0).sum()) if "order" in df.columns else 0
+    total_order_qty = int(df.loc[df["order"] > 0, "order"].sum()) if "order" in df.columns else 0
 
-    col1.metric("Total Items", len(df))
+    m1, m2, m3, m4 = st.columns(4)
 
-    if "Safety" in df.columns:
-        col2.metric("Total Safety", int(df["Safety"].sum()))
-    else:
-        col2.metric("Total Safety", "Removed")
+    with m1:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-label">Total Items</div>
+            <div class="metric-value">{total_items:,}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    if "order" in df.columns:
-        col3.metric("Items to Order", int((df["order"] > 0).sum()))
-    else:
-        col3.metric("Items to Order", "Removed")
+    with m2:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-label">Total Safety</div>
+            <div class="metric-value">{total_safety:,}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with m3:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-label">Items to Order</div>
+            <div class="metric-value">{items_to_order:,}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with m4:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-label">Total Order Qty</div>
+            <div class="metric-value">{total_order_qty:,}</div>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.markdown('</div>', unsafe_allow_html=True)
 
     # =========================
-    # CARD 4 — RESULTS
+    # RESULTS SECTION
     # =========================
     st.markdown('<div class="card">', unsafe_allow_html=True)
 
-    st.markdown("### 📋 Results")
+    top_left, top_right = st.columns([2, 1])
 
-    st.dataframe(df, use_container_width=True)
+    with top_left:
+        st.markdown('<div class="section-title">📋 Processed Results</div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="section-subtitle">Review the calculated inventory recommendations before exporting.</div>',
+            unsafe_allow_html=True
+        )
+
+    with top_right:
+        search_text = st.text_input(
+            "Search item or description",
+            placeholder="Type to filter...",
+            label_visibility="collapsed"
+        )
+
+    display_df = df.copy()
+
+    if search_text:
+        search_text = search_text.lower()
+
+        display_df = display_df[
+            display_df["Item No.1"].astype(str).str.lower().str.contains(search_text, na=False)
+            | display_df["Description"].astype(str).str.lower().str.contains(search_text, na=False)
+        ]
+
+    st.dataframe(
+        display_df,
+        use_container_width=True,
+        height=520
+    )
 
     st.markdown('</div>', unsafe_allow_html=True)
 
     # =========================
-    # CARD 5 — EXPORT
+    # EXPORT SECTION
     # =========================
     st.markdown('<div class="card">', unsafe_allow_html=True)
 
-    st.markdown("### ⬇️ Export")
+    export_left, export_right = st.columns([2, 1])
+
+    with export_left:
+        st.markdown('<div class="section-title">⬇️ Export Report</div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="section-subtitle">Download the complete processed file as Excel.</div>',
+            unsafe_allow_html=True
+        )
 
     output = BytesIO()
     df.to_excel(output, index=False)
     output.seek(0)
 
-    st.download_button(
-        label="📥 Download Processed File",
-        data=output,
-        file_name="processed_inventory.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+    with export_right:
+        st.download_button(
+            label="📥 Download Excel Report",
+            data=output,
+            file_name="processed_inventory.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True
+        )
 
     st.markdown('</div>', unsafe_allow_html=True)
