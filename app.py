@@ -216,7 +216,7 @@ with st.sidebar:
     months = st.number_input(
         "Months",
         min_value=1.0,
-        value=13.0,
+        value=17.0,
         step=0.5,
         format="%.1f"
     )
@@ -224,7 +224,7 @@ with st.sidebar:
     factor = st.number_input(
         "FACTOR",
         min_value=0.0,
-        value=1.0,
+        value=6.0,
         step=0.1,
         format="%.1f"
     )
