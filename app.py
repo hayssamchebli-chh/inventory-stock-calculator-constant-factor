@@ -8,7 +8,7 @@ from io import BytesIO
 st.set_page_config(page_title="Inventory Calculator", layout="wide")
 
 # =========================
-# CSS
+# CSS (Card UI)
 # =========================
 st.markdown("""
 <style>
@@ -29,11 +29,52 @@ hr {display:none;}
 # =========================
 # HEADER
 # =========================
-st.title("📦 Inventory File Processor")
-st.markdown("Upload your Excel file, keep the required columns, remove zero-only columns, and calculate inventory metrics.")
+st.title("📦 Inventory Safety Stock Calculator")
+st.markdown("Upload your file, set months and factor, and generate replenishment recommendations.")
 
 # =========================
-# FILE UPLOAD
+# CARD 1 — PARAMETERS
+# =========================
+st.markdown('<div class="card">', unsafe_allow_html=True)
+
+st.markdown("### ⚙️ Parameters")
+
+col1, col2 = st.columns(2)
+
+with col2:
+    months = st.number_input(
+        "Months",
+        min_value=1.0,
+        value=13.0,
+        step=0.5,
+        format="%.1f"
+    )
+
+    factor = st.number_input(
+        "FACTOR",
+        min_value=0.0,
+        value=1.0,
+        step=0.1,
+        format="%.1f"
+    )
+
+with col1:
+    st.markdown("#### ℹ️ About")
+    st.write(
+        f"""
+This tool calculates safety stock and recommended order quantity.
+
+- **Months:** {months}
+- **FACTOR:** {factor}
+- **Safety:** ROUND(Sales 25&26 / Months) × FACTOR
+- **Order:** Safety - Forcasted
+"""
+    )
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# =========================
+# CARD 2 — FILE UPLOAD
 # =========================
 st.markdown('<div class="card">', unsafe_allow_html=True)
 
@@ -60,51 +101,41 @@ if uploaded_file:
     df.columns = df.columns.str.strip()
 
     # -------------------------
-    # COLUMNS TO KEEP
+    # REQUIRED INPUT COLUMNS
     # -------------------------
-    keep_columns = [
+    required_columns = [
         "Item No.1",
         "Description",
         "Stock Available Quantity",
-        "Stock Reserved",
         "Advanced Reserved",
         "PR Approved Qty",
         "Qty Sold",
         "Qty Sold PYear",
-        "Blanket PO Qty",
-        "PO Qty",
         "PO not Shipped",
-        "Qty to Recieve",
         "Cons. Qty",
         "Cons. Qty New"
     ]
 
-    # -------------------------
-    # VALIDATION
-    # -------------------------
-    missing_cols = [col for col in keep_columns if col not in df.columns]
+    missing_cols = [c for c in required_columns if c not in df.columns]
 
     if missing_cols:
         st.error(f"❌ Missing columns: {missing_cols}")
         st.write("Detected columns:", df.columns.tolist())
         st.stop()
 
-    df = df[keep_columns].copy()
+    # Keep only needed source columns first
+    df = df[required_columns].copy()
 
     # -------------------------
-    # CONVERT NUMERIC COLUMNS
+    # NUMERIC CONVERSION
     # -------------------------
     numeric_columns = [
         "Stock Available Quantity",
-        "Stock Reserved",
         "Advanced Reserved",
         "PR Approved Qty",
         "Qty Sold",
         "Qty Sold PYear",
-        "Blanket PO Qty",
-        "PO Qty",
         "PO not Shipped",
-        "Qty to Recieve",
         "Cons. Qty",
         "Cons. Qty New"
     ]
@@ -117,29 +148,60 @@ if uploaded_file:
     # -------------------------
     df["In order"] = df["PO not Shipped"] - df["Advanced Reserved"]
 
-    df["Forecasted"] = df["Stock Available Quantity"] + df["In order"]
+    df["Forcasted"] = df["Stock Available Quantity"] + df["In order"]
 
-    df["Sales25&26"] = (
+    df["Sales 25&26"] = (
         df["Qty Sold"]
         + df["Qty Sold PYear"]
         + df["Cons. Qty"]
         + df["Cons. Qty New"]
     )
 
+    df["Safety"] = ((df["Sales 25&26"] / months).round(0) * factor)
+
+    df["FACTOR"] = factor
+
+    df["order"] = df["Safety"] - df["Forcasted"]
+
+    # -------------------------
+    # FINAL COLUMN ORDER
+    # -------------------------
+    final_columns = [
+        "Item No.1",
+        "Description",
+        "Stock Available Quantity",
+        "In order",
+        "Advanced Reserved",
+        "Forcasted",
+        "PR Approved Qty",
+        "Qty Sold",
+        "Qty Sold PYear",
+        "PO not Shipped",
+        "Cons. Qty",
+        "Cons. Qty New",
+        "Sales 25&26",
+        "Safety",
+        "FACTOR",
+        "order"
+    ]
+
+    df = df[final_columns]
+
     # -------------------------
     # REMOVE COLUMNS THAT CONTAIN ONLY 0
-    # Do not remove item/description columns.
+    # Keep text/id columns even if blank.
     # -------------------------
     protected_columns = ["Item No.1", "Description"]
 
     for col in df.columns.tolist():
         if col not in protected_columns:
             numeric_col = pd.to_numeric(df[col], errors="coerce").fillna(0)
+
             if (numeric_col == 0).all():
                 df.drop(columns=[col], inplace=True)
 
     # =========================
-    # SUMMARY CARD
+    # CARD 3 — KPI
     # =========================
     st.markdown('<div class="card">', unsafe_allow_html=True)
 
@@ -149,20 +211,20 @@ if uploaded_file:
 
     col1.metric("Total Items", len(df))
 
-    if "Forecasted" in df.columns:
-        col2.metric("Total Forecasted", int(df["Forecasted"].sum()))
+    if "Safety" in df.columns:
+        col2.metric("Total Safety", int(df["Safety"].sum()))
     else:
-        col2.metric("Total Forecasted", "Removed")
+        col2.metric("Total Safety", "Removed")
 
-    if "Sales25&26" in df.columns:
-        col3.metric("Total Sales25&26", int(df["Sales25&26"].sum()))
+    if "order" in df.columns:
+        col3.metric("Items to Order", int((df["order"] > 0).sum()))
     else:
-        col3.metric("Total Sales25&26", "Removed")
+        col3.metric("Items to Order", "Removed")
 
     st.markdown('</div>', unsafe_allow_html=True)
 
     # =========================
-    # RESULTS CARD
+    # CARD 4 — RESULTS
     # =========================
     st.markdown('<div class="card">', unsafe_allow_html=True)
 
@@ -173,7 +235,7 @@ if uploaded_file:
     st.markdown('</div>', unsafe_allow_html=True)
 
     # =========================
-    # EXPORT CARD
+    # CARD 5 — EXPORT
     # =========================
     st.markdown('<div class="card">', unsafe_allow_html=True)
 
