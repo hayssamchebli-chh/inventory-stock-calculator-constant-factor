@@ -16,27 +16,74 @@ st.set_page_config(
 # =========================
 st.markdown("""
 <style>
-/* Main background */
+/* =========================
+   REMOVE WHITE TOP BAR LOOK
+   ========================= */
+
+/* Main app background */
 .stApp {
     background: linear-gradient(180deg, #f5f7fb 0%, #eef2f7 100%);
 }
 
-/* Hide default Streamlit footer */
-footer {
-    visibility: hidden;
+/* Streamlit header / toolbar */
+[data-testid="stHeader"] {
+    background: #f5f7fb;
+    height: 0rem;
 }
 
-/* Main container spacing */
+/* Optional: hide the top decoration line */
+[data-testid="stDecoration"] {
+    display: none;
+}
+
+/* Remove extra top padding */
 .block-container {
-    padding-top: 2rem;
+    padding-top: 1.2rem;
     padding-bottom: 2rem;
+    max-width: 1200px;
 }
 
-/* Hero section */
+/* =========================
+   SIDEBAR WIDTH
+   ========================= */
+
+/* Sidebar container width */
+section[data-testid="stSidebar"] {
+    width: 400px !important;
+    min-width: 400px !important;
+    max-width: 400px !important;
+}
+
+/* Sidebar inner content */
+section[data-testid="stSidebar"] > div {
+    width: 400px !important;
+    min-width: 400px !important;
+    max-width: 400px !important;
+    background: #f1f4f8;
+    padding-top: 2rem;
+}
+
+/* Main page shifts according to sidebar width */
+section[data-testid="stSidebar"] ~ div {
+    margin-left: 0;
+}
+
+/* Sidebar text */
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3 {
+    color: #1f2937;
+    font-weight: 800;
+}
+
+/* =========================
+   HERO SECTION
+   ========================= */
+
 .hero {
     background: linear-gradient(135deg, #102a43 0%, #243b53 100%);
     padding: 34px 38px;
-    border-radius: 22px;
+    border-radius: 0 0 22px 22px;
     color: white;
     margin-bottom: 26px;
     box-shadow: 0 12px 30px rgba(16, 42, 67, 0.22);
@@ -55,7 +102,10 @@ footer {
     color: #d9e2ec;
 }
 
-/* Cards */
+/* =========================
+   CARDS
+   ========================= */
+
 .card {
     background: #ffffff;
     padding: 24px;
@@ -65,7 +115,6 @@ footer {
     margin-bottom: 22px;
 }
 
-/* Section headings */
 .section-title {
     font-size: 20px;
     font-weight: 750;
@@ -79,7 +128,19 @@ footer {
     margin-bottom: 18px;
 }
 
-/* Metric cards */
+.info-box {
+    background: #f0f7ff;
+    border-left: 5px solid #2f80ed;
+    padding: 16px 18px;
+    border-radius: 14px;
+    color: #243b53;
+    font-size: 14px;
+}
+
+/* =========================
+   METRIC CARDS
+   ========================= */
+
 .metric-card {
     background: #ffffff;
     border: 1px solid #e2e8f0;
@@ -101,30 +162,15 @@ footer {
     font-weight: 800;
 }
 
-/* Info box */
-.info-box {
-    background: #f0f7ff;
-    border-left: 5px solid #2f80ed;
-    padding: 16px 18px;
-    border-radius: 14px;
-    color: #243b53;
-    font-size: 14px;
-}
+/* =========================
+   TABLE + BUTTONS
+   ========================= */
 
-/* Upload area text */
-.upload-note {
-    color: #627d98;
-    font-size: 14px;
-    margin-top: -6px;
-}
-
-/* Dataframe spacing */
 [data-testid="stDataFrame"] {
     border-radius: 14px;
     overflow: hidden;
 }
 
-/* Buttons */
 .stDownloadButton > button {
     background: linear-gradient(135deg, #1f7aec 0%, #155bd5 100%);
     color: white;
@@ -140,18 +186,16 @@ footer {
     color: white;
 }
 
-/* Alerts */
-.stSuccess, .stWarning, .stError {
-    border-radius: 12px;
+/* Hide Streamlit footer */
+footer {
+    visibility: hidden;
 }
 
-/* Remove horizontal rule styling */
 hr {
     display: none;
 }
 </style>
 """, unsafe_allow_html=True)
-
 # =========================
 # HEADER / HERO
 # =========================
