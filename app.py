@@ -250,7 +250,7 @@ with st.sidebar:
 # =========================
 st.markdown('<div class="card">', unsafe_allow_html=True)
 
-left, right = st.columns([1.4, 1])
+left, right = st.columns([1, 1])
 
 with left:
     st.markdown('<div class="section-title">📂 Upload Inventory File</div>', unsafe_allow_html=True)
