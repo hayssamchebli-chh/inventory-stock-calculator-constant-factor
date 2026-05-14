@@ -33,7 +33,8 @@ st.markdown("""
     padding-top: 50px;
     padding-bottom: 2rem;
     max-width: 1200px;
-    height: 4000px
+    height: 4000px;
+    overflow: hidden;
 }
 
 section[data-testid="stSidebar"] {
