@@ -280,9 +280,9 @@ with left:
 with right:
     st.markdown("""
     <div class="info-box">
-        <strong>Main file:</strong> Required inventory report<br>
-        <strong>Safety file:</strong> Optional item-level factor file<br>
-        <strong>Default behavior:</strong> One factor applied to all items<br>
+        <strong>Main file:</strong> Required inventory report<br><br>
+        <strong>Safety file:</strong> Optional item-level factor file<br><br>
+        <strong>Default behavior:</strong> One factor applied to all items<br><br>
         <strong>Zero-only columns:</strong> Removed automatically
     </div>
     """, unsafe_allow_html=True)
