@@ -100,6 +100,7 @@ section[data-testid="stSidebar"] > div {
     border-radius: 14px;
     color: #243b53;
     font-size: 14px;
+    height: 4000px 
 }
 
 .success-box {
