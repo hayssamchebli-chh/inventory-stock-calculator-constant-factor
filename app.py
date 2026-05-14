@@ -46,7 +46,7 @@ section[data-testid="stSidebar"] > div {
     min-width: 330px !important;
     max-width: 330px !important;
     background: #f1f4f8;
-    padding-top: 2rem;
+    padding-top: 50px;
 }
 
 .hero {
