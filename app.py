@@ -36,8 +36,8 @@ st.markdown("""
 }
 
 section[data-testid="stSidebar"] {
-    width: 330px !important;
-    min-width: 330px !important;
+    width: 300px !important;
+    min-width: 0 !important;
     max-width: 330px !important;
 }
 
