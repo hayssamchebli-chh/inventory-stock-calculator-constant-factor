@@ -16,74 +16,43 @@ st.set_page_config(
 # =========================
 st.markdown("""
 <style>
-/* =========================
-   REMOVE WHITE TOP BAR LOOK
-   ========================= */
-
-/* Main app background */
 .stApp {
     background: linear-gradient(180deg, #f5f7fb 0%, #eef2f7 100%);
 }
 
-/* Streamlit header / toolbar */
 [data-testid="stHeader"] {
     background: #f5f7fb;
     height: 0rem;
 }
 
-/* Optional: hide the top decoration line */
 [data-testid="stDecoration"] {
     display: none;
 }
 
-/* Remove extra top padding */
 .block-container {
     padding-top: 1.2rem;
     padding-bottom: 2rem;
     max-width: 1200px;
 }
 
-/* =========================
-   SIDEBAR WIDTH
-   ========================= */
-
-/* Sidebar container width */
 section[data-testid="stSidebar"] {
-    width: 400px !important;
-    min-width: 400px !important;
-    max-width: 400px !important;
+    width: 330px !important;
+    min-width: 330px !important;
+    max-width: 330px !important;
 }
 
-/* Sidebar inner content */
 section[data-testid="stSidebar"] > div {
-    width: 400px !important;
-    min-width: 400px !important;
-    max-width: 400px !important;
+    width: 330px !important;
+    min-width: 330px !important;
+    max-width: 330px !important;
     background: #f1f4f8;
     padding-top: 2rem;
 }
 
-/* Main page shifts according to sidebar width */
-section[data-testid="stSidebar"] ~ div {
-    margin-left: 0;
-}
-
-/* Sidebar text */
-section[data-testid="stSidebar"] h1,
-section[data-testid="stSidebar"] h2,
-section[data-testid="stSidebar"] h3 {
-    color: #1f2937;
-    font-weight: 800;
-}
-
-/* =========================
-   HERO SECTION
-   ========================= */
-
 .hero {
     background: linear-gradient(135deg, #102a43 0%, #243b53 100%);
     padding: 34px 38px;
-    border-radius: 0 0 22px 22px;
+    border-radius: 22px;
     color: white;
     margin-bottom: 26px;
     box-shadow: 0 12px 30px rgba(16, 42, 67, 0.22);
@@ -101,10 +70,6 @@ section[data-testid="stSidebar"] h3 {
     font-size: 16px;
     color: #d9e2ec;
 }
-
-/* =========================
-   CARDS
-   ========================= */
 
 .card {
     background: #ffffff;
@@ -137,9 +102,23 @@ section[data-testid="stSidebar"] h3 {
     font-size: 14px;
 }
 
-/* =========================
-   METRIC CARDS
-   ========================= */
+.success-box {
+    background: #ecfdf5;
+    border-left: 5px solid #10b981;
+    padding: 16px 18px;
+    border-radius: 14px;
+    color: #064e3b;
+    font-size: 14px;
+}
+
+.warning-box {
+    background: #fffbeb;
+    border-left: 5px solid #f59e0b;
+    padding: 16px 18px;
+    border-radius: 14px;
+    color: #78350f;
+    font-size: 14px;
+}
 
 .metric-card {
     background: #ffffff;
@@ -162,13 +141,20 @@ section[data-testid="stSidebar"] h3 {
     font-weight: 800;
 }
 
-/* =========================
-   TABLE + BUTTONS
-   ========================= */
+.metric-note {
+    font-size: 12px;
+    color: #829ab1;
+    margin-top: 6px;
+}
 
 [data-testid="stDataFrame"] {
     border-radius: 14px;
     overflow: hidden;
+}
+
+.stButton > button {
+    border-radius: 12px;
+    font-weight: 700;
 }
 
 .stDownloadButton > button {
@@ -186,7 +172,6 @@ section[data-testid="stSidebar"] h3 {
     color: white;
 }
 
-/* Hide Streamlit footer */
 footer {
     visibility: hidden;
 }
@@ -196,13 +181,14 @@ hr {
 }
 </style>
 """, unsafe_allow_html=True)
+
 # =========================
-# HEADER / HERO
+# HERO
 # =========================
 st.markdown("""
 <div class="hero">
     <h1>📦 Inventory Safety Stock Calculator</h1>
-    <p>Upload your inventory file, adjust planning parameters, review calculated stock recommendations, and export a clean Excel report.</p>
+    <p>Upload your inventory file, choose a default safety factor, optionally upload item-level factors, and export a clean replenishment recommendation report.</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -211,22 +197,35 @@ st.markdown("""
 # =========================
 with st.sidebar:
     st.markdown("## ⚙️ Parameters")
-    st.markdown("Adjust the values below before or after uploading your file.")
+    st.markdown("Set the planning values below.")
 
     months = st.number_input(
         "Months",
         min_value=1.0,
-        value=17.0,
+        value=13.0,
         step=0.5,
         format="%.1f"
     )
 
-    factor = st.number_input(
-        "FACTOR",
+    default_factor = st.number_input(
+        "Default FACTOR",
         min_value=0.0,
-        value=6.0,
+        value=1.0,
         step=0.1,
-        format="%.1f"
+        format="%.2f"
+    )
+
+    st.markdown("---")
+
+    st.markdown("### Factor Rule")
+    st.markdown(
+        f"""
+        By default, the app applies this factor to all items:
+
+        **Default FACTOR = {default_factor}**
+
+        You may optionally upload a Safety Factor File to use different factors per item.
+        """
     )
 
     st.markdown("---")
@@ -234,6 +233,12 @@ with st.sidebar:
     st.markdown("### Formula")
     st.markdown(
         """
+        **In order**  
+        PO not Shipped - Advanced Reserved
+
+        **Forcasted**  
+        Stock Available Quantity + In order
+
         **Sales 25&26**  
         Qty Sold + Qty Sold PYear + Cons. Qty + Cons. Qty New
 
@@ -246,38 +251,49 @@ with st.sidebar:
     )
 
 # =========================
-# UPLOAD CARD
+# FILE UPLOAD CARD
 # =========================
 st.markdown('<div class="card">', unsafe_allow_html=True)
 
-left, right = st.columns([1, 1])
+left, right = st.columns([1.4, 1])
 
 with left:
-    st.markdown('<div class="section-title">📂 Upload Inventory File</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">📂 Upload Files</div>', unsafe_allow_html=True)
     st.markdown(
-        '<div class="section-subtitle">Upload the Excel file generated from your inventory report.</div>',
+        '<div class="section-subtitle">Upload the main inventory file. The safety factor file is optional.</div>',
         unsafe_allow_html=True
     )
 
-    uploaded_file = st.file_uploader(
-        "Main Inventory File",
-        type=["xlsx"],
-        label_visibility="collapsed"
-    )
+    upload_col1, upload_col2 = st.columns(2)
+
+    with upload_col1:
+        uploaded_file = st.file_uploader(
+            "Main Inventory File",
+            type=["xlsx"]
+        )
+
+    with upload_col2:
+        sf_file = st.file_uploader(
+            "Optional Safety Factor File",
+            type=["xlsx"]
+        )
 
 with right:
     st.markdown("""
     <div class="info-box">
-        <strong>Expected file type:</strong> Excel .xlsx<br>
-        <strong>Output:</strong> Cleaned inventory recommendation file<br>
+        <strong>Main file:</strong> Required inventory report<br>
+        <strong>Safety file:</strong> Optional item-level factor file<br>
+        <strong>Default behavior:</strong> One factor applied to all items<br>
         <strong>Zero-only columns:</strong> Removed automatically
     </div>
     """, unsafe_allow_html=True)
 
-if uploaded_file:
-    st.success("✅ File uploaded successfully. Results are ready below.")
+if uploaded_file and sf_file:
+    st.success("✅ Main file and safety factor file uploaded. Item-level factors will be used.")
+elif uploaded_file:
+    st.info("ℹ️ Main file uploaded. The default FACTOR from the sidebar will be applied to all items.")
 else:
-    st.warning("⚠️ Upload an Excel file to generate the inventory report.")
+    st.warning("⚠️ Please upload the main inventory file to generate the inventory report.")
 
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -287,20 +303,19 @@ st.markdown('</div>', unsafe_allow_html=True)
 if uploaded_file:
 
     # -------------------------
-    # LOAD DATA
+    # LOAD MAIN DATA
     # -------------------------
     df = pd.read_excel(uploaded_file)
     df.columns = df.columns.str.strip()
 
     # -------------------------
-    # REQUIRED INPUT COLUMNS
+    # REQUIRED MAIN FILE COLUMNS
     # -------------------------
     required_columns = [
         "Item No.1",
         "Description",
         "Stock Available Quantity",
         "Advanced Reserved",
-        "PR Approved Qty",
         "Qty Sold",
         "Qty Sold PYear",
         "PO not Shipped",
@@ -312,13 +327,74 @@ if uploaded_file:
 
     if missing_cols:
         st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.error(f"❌ Missing columns: {missing_cols}")
+        st.error(f"❌ Missing columns in main file: {missing_cols}")
         st.write("Detected columns:", df.columns.tolist())
         st.markdown('</div>', unsafe_allow_html=True)
         st.stop()
 
-    # Keep only needed source columns first
+    # -------------------------
+    # KEEP ONLY NEEDED COLUMNS
+    # -------------------------
     df = df[required_columns].copy()
+
+    # -------------------------
+    # CLEAN ITEM NUMBER
+    # -------------------------
+    df["Item No.1"] = df["Item No.1"].astype(str).str.strip()
+
+    # -------------------------
+    # DEFAULT FACTOR MODE
+    # -------------------------
+    df["Safety stock factor"] = default_factor
+    missing_factor_count = 0
+    factor_source = "Default FACTOR"
+
+    # -------------------------
+    # OPTIONAL SAFETY FACTOR FILE
+    # -------------------------
+    if sf_file:
+        safety_df = pd.read_excel(sf_file)
+        safety_df.columns = safety_df.columns.str.strip()
+
+        required_sf_cols = [
+            "Item No.1",
+            "Safety stock factor"
+        ]
+
+        missing_sf = [c for c in required_sf_cols if c not in safety_df.columns]
+
+        if missing_sf:
+            st.markdown('<div class="card">', unsafe_allow_html=True)
+            st.error(f"❌ Missing columns in safety factor file: {missing_sf}")
+            st.write("Detected columns:", safety_df.columns.tolist())
+            st.markdown('</div>', unsafe_allow_html=True)
+            st.stop()
+
+        safety_df = safety_df[required_sf_cols].copy()
+
+        safety_df["Item No.1"] = safety_df["Item No.1"].astype(str).str.strip()
+
+        safety_df["Safety stock factor"] = pd.to_numeric(
+            safety_df["Safety stock factor"],
+            errors="coerce"
+        )
+
+        safety_df = safety_df.drop_duplicates(
+            subset=["Item No.1"],
+            keep="first"
+        )
+
+        df = df.drop(columns=["Safety stock factor"]).merge(
+            safety_df,
+            on="Item No.1",
+            how="left"
+        )
+
+        missing_factor_count = df["Safety stock factor"].isna().sum()
+
+        df["Safety stock factor"] = df["Safety stock factor"].fillna(default_factor)
+
+        factor_source = "Uploaded item-level FACTOR file"
 
     # -------------------------
     # NUMERIC CONVERSION
@@ -326,16 +402,114 @@ if uploaded_file:
     numeric_columns = [
         "Stock Available Quantity",
         "Advanced Reserved",
-        "PR Approved Qty",
         "Qty Sold",
         "Qty Sold PYear",
         "PO not Shipped",
         "Cons. Qty",
-        "Cons. Qty New"
+        "Cons. Qty New",
+        "Safety stock factor"
     ]
 
     for col in numeric_columns:
         df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
+
+    # =========================
+    # SAFETY FACTOR MANAGEMENT
+    # =========================
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+
+    st.markdown('<div class="section-title">✏️ Safety Factor Management</div>', unsafe_allow_html=True)
+
+    if sf_file:
+        st.markdown(
+            '<div class="section-subtitle">Item-level safety factors are loaded from the optional safety factor file. Missing factors use the default FACTOR from the sidebar.</div>',
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown(
+            '<div class="section-subtitle">The default FACTOR from the sidebar is applied to all items. You can still edit factors before exporting.</div>',
+            unsafe_allow_html=True
+        )
+
+    status_col1, status_col2 = st.columns(2)
+
+    with status_col1:
+        st.markdown(f"""
+        <div class="success-box">
+            <strong>Factor source:</strong> {factor_source}<br>
+            <strong>Default FACTOR:</strong> {default_factor}
+        </div>
+        """, unsafe_allow_html=True)
+
+    with status_col2:
+        if sf_file and missing_factor_count > 0:
+            st.markdown(f"""
+            <div class="warning-box">
+                <strong>Missing item factors:</strong> {missing_factor_count}<br>
+                These items were filled with the default FACTOR.
+            </div>
+            """, unsafe_allow_html=True)
+        elif sf_file:
+            st.markdown("""
+            <div class="success-box">
+                <strong>Safety factor file:</strong> Uploaded<br>
+                All matched items were processed successfully.
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown("""
+            <div class="info-box">
+                <strong>Safety factor file:</strong> Not uploaded<br>
+                The default FACTOR is applied to every item.
+            </div>
+            """, unsafe_allow_html=True)
+
+    if "edit_mode" not in st.session_state:
+        st.session_state.edit_mode = False
+
+    edit_button_label = "Hide Safety Factor Editor" if st.session_state.edit_mode else "Edit Safety Factors"
+
+    if st.button(edit_button_label):
+        st.session_state.edit_mode = not st.session_state.edit_mode
+
+    if st.session_state.edit_mode:
+        edit_df = df[
+            [
+                "Item No.1",
+                "Description",
+                "Safety stock factor"
+            ]
+        ].copy()
+
+        edited = st.data_editor(
+            edit_df,
+            column_config={
+                "Item No.1": st.column_config.TextColumn(
+                    "Item No.1",
+                    disabled=True
+                ),
+                "Description": st.column_config.TextColumn(
+                    "Description",
+                    disabled=True
+                ),
+                "Safety stock factor": st.column_config.NumberColumn(
+                    "Safety stock factor",
+                    min_value=0.0,
+                    step=0.1,
+                    format="%.2f"
+                )
+            },
+            use_container_width=True,
+            height=350,
+            hide_index=True
+        )
+
+        df["Safety stock factor"] = pd.to_numeric(
+            edited["Safety stock factor"],
+            errors="coerce"
+        ).fillna(default_factor).values
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # -------------------------
     # CALCULATIONS
@@ -351,9 +525,9 @@ if uploaded_file:
         + df["Cons. Qty New"]
     )
 
-    df["Safety"] = ((df["Sales 25&26"] / months).round(0) * factor)
+    df["Safety"] = ((df["Sales 25&26"] / months).round(0) * df["Safety stock factor"])
 
-    df["FACTOR"] = factor
+    df["FACTOR"] = df["Safety stock factor"]
 
     df["order"] = df["Safety"] - df["Forcasted"]
 
@@ -367,7 +541,6 @@ if uploaded_file:
         "In order",
         "Advanced Reserved",
         "Forcasted",
-        "PR Approved Qty",
         "Qty Sold",
         "Qty Sold PYear",
         "PO not Shipped",
@@ -383,9 +556,12 @@ if uploaded_file:
 
     # -------------------------
     # REMOVE COLUMNS THAT CONTAIN ONLY 0
-    # Keep text/id columns even if blank.
+    # Keep item and description columns.
     # -------------------------
-    protected_columns = ["Item No.1", "Description"]
+    protected_columns = [
+        "Item No.1",
+        "Description"
+    ]
 
     for col in df.columns.tolist():
         if col not in protected_columns:
@@ -417,14 +593,16 @@ if uploaded_file:
         <div class="metric-card">
             <div class="metric-label">Total Items</div>
             <div class="metric-value">{total_items:,}</div>
+            <div class="metric-note">Rows processed</div>
         </div>
         """, unsafe_allow_html=True)
 
     with m2:
         st.markdown(f"""
         <div class="metric-card">
-            <div class="metric-label">Total Safety</div>
-            <div class="metric-value">{total_safety:,}</div>
+            <div class="metric-label">Missing Factors</div>
+            <div class="metric-value">{missing_factor_count:,}</div>
+            <div class="metric-note">Filled with default factor</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -433,6 +611,7 @@ if uploaded_file:
         <div class="metric-card">
             <div class="metric-label">Items to Order</div>
             <div class="metric-value">{items_to_order:,}</div>
+            <div class="metric-note">Items where order &gt; 0</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -441,6 +620,7 @@ if uploaded_file:
         <div class="metric-card">
             <div class="metric-label">Total Order Qty</div>
             <div class="metric-value">{total_order_qty:,}</div>
+            <div class="metric-note">Sum of positive order qty</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -495,7 +675,7 @@ if uploaded_file:
     with export_left:
         st.markdown('<div class="section-title">⬇️ Export Report</div>', unsafe_allow_html=True)
         st.markdown(
-            '<div class="section-subtitle">Download the complete processed file as Excel.</div>',
+            '<div class="section-subtitle">Download the complete processed file as Excel. Search filtering does not affect the exported file.</div>',
             unsafe_allow_html=True
         )
 
