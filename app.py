@@ -33,7 +33,7 @@ st.markdown("""
     padding-top: 50px;
     padding-bottom: 2rem;
     max-width: 1200px;
-    height: 200px;
+    height: 500px;
     overflow: hidden;
 }
 
