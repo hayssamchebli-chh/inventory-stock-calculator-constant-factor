@@ -33,6 +33,7 @@ st.markdown("""
     padding-top: 50px;
     padding-bottom: 2rem;
     max-width: 1200px;
+    height: 4000px
 }
 
 section[data-testid="stSidebar"] {
