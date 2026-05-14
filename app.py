@@ -187,7 +187,7 @@ hr {
 # =========================
 st.markdown("""
 <div class="hero">
-    <h1>📦 Inventory Safety Stock Calculator</h1>
+    <h1>📦 Inventory Data to Order Recommendations</h1>
     <p>Upload your inventory file, choose a default safety factor, optionally upload item-level factors, and export a clean replenishment recommendation report.</p>
 </div>
 """, unsafe_allow_html=True)
