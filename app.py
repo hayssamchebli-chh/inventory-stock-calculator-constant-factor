@@ -222,7 +222,7 @@ with st.sidebar:
         f"""
         By default, the app applies this factor to all items:
 
-        **Default FACTOR = {default_factor}**
+        Default FACTOR = {default_factor}**
 
         You may optionally upload a Safety Factor File to use different factors per item.
         """
