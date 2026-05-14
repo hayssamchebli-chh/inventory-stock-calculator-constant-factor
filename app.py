@@ -212,7 +212,7 @@ with st.sidebar:
         min_value=0.0,
         value=6.0,
         step=0.1,
-        format="%.2f"
+        format="%.1f"
     )
 
     st.markdown("---")
