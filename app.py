@@ -33,7 +33,6 @@ st.markdown("""
     padding-top: 50px;
     padding-bottom: 2rem;
     max-width: 1200px;
-    height: 200px;
 }
 
 section[data-testid="stSidebar"] {
@@ -252,7 +251,7 @@ with st.sidebar:
 # =========================
 # FILE UPLOAD CARD
 # =========================
-st.markdown('<div class="card">', unsafe_allow_html=True)
+
 
 left, right = st.columns([1.4, 1])
 
