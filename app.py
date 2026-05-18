@@ -104,6 +104,15 @@ section[data-testid="stSidebar"] > div {
     height: 200px 
 }
 
+.info-box1 {
+    background: #f0f7ff;
+    border-left: 5px solid #2f80ed;
+    padding: 16px 18px;
+    border-radius: 14px;
+    color: #243b53;
+    font-size: 14px;
+    height: 80px 
+}
 .success-box {
     background: #ecfdf5;
     border-left: 5px solid #10b981;
@@ -464,7 +473,7 @@ if uploaded_file:
             """, unsafe_allow_html=True)
         else:
             st.markdown("""
-            <div class="info-box">
+            <div class="info-box1">
                 <strong>Safety factor file:</strong> Not uploaded<br>
                 The default FACTOR is applied to every item.
             </div>
