@@ -514,7 +514,7 @@ if uploaded_file:
     # -------------------------
     # CALCULATIONS
     # -------------------------
-    df["In order"] = df["PO not Shipped"] - df["Advanced Reserved"]
+    df["In order"] = df["PO not Shipped"] + df["PR Approved Qty"] + df["PO Qty"] + df["Qty to Recieve"] - df["Advanced Reserved"]
 
     df["Forcasted"] = df["Stock Available Quantity"] + df["In order"]
 
