@@ -234,7 +234,7 @@ with st.sidebar:
     st.markdown(
         """
         **In order**  
-        PO not Shipped - Advanced Reserved
+        PO not Shipped + PR Approved Qty + PO Qty + Qty to Recieve - Advanced Reserved
 
         **Forcasted**  
         Stock Available Quantity + In order
@@ -316,9 +316,12 @@ if uploaded_file:
         "Description",
         "Stock Available Quantity",
         "Advanced Reserved",
+        "PR Approved Qty",
+        "PO Qty",
+        "PO not Shipped",
+        "Qty to Recieve",
         "Qty Sold",
         "Qty Sold PYear",
-        "PO not Shipped",
         "Cons. Qty",
         "Cons. Qty New"
     ]
@@ -402,9 +405,12 @@ if uploaded_file:
     numeric_columns = [
         "Stock Available Quantity",
         "Advanced Reserved",
+        "PR Approved Qty",
+        "PO Qty",
+        "PO not Shipped",
+        "Qty to Recieve",
         "Qty Sold",
         "Qty Sold PYear",
-        "PO not Shipped",
         "Cons. Qty",
         "Cons. Qty New",
         "Safety stock factor"
